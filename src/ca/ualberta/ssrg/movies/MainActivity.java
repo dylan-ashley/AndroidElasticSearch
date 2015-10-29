@@ -11,6 +11,9 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.awt.TextArea;
+
 import ca.ualberta.ssrg.androidelasticsearch.R;
 import ca.ualberta.ssrg.movies.es.ESMovieManager;
 import ca.ualberta.ssrg.movies.es.Movie;
@@ -74,15 +77,21 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		
+
+		// You cannot access the network from the gui thread
+		// So, let us create another thread to do that work.
+		// If we try to use the gui thread -- the gui will stop and wait.
+
+		SearchThread thread = new SearchThread("*");
+
+		thread.start();
 
 		// Refresh the list when visible
 		// TODO: Search all
-		
+
 	}
-	
-	/** 
+
+	/**
 	 * Called when the model changes
 	 */
 	public void notifyUpdated() {
@@ -92,11 +101,11 @@ public class MainActivity extends Activity {
 				moviesViewAdapter.notifyDataSetChanged();
 			}
 		};
-		
+
 		runOnUiThread(doUpdateGUIList);
 	}
 
-	/** 
+	/**
 	 * Search for movies with a given word(s) in the text view
 	 * @param view
 	 */
@@ -104,11 +113,14 @@ public class MainActivity extends Activity {
 		movies.clear();
 
 		// TODO: Extract search query from text view
-		
+		EditText editText = (EditText) findViewById(R.id.editText1);
+		String query = editText.getText().toString();
+
 		// TODO: Run the search thread
-		
+		SearchThread thread = new SearchThread(query);
+		thread.start();
 	}
-	
+
 	/**
 	 * Starts activity with details for a movie
 	 * @param movieId Movie id
@@ -119,7 +131,7 @@ public class MainActivity extends Activity {
 
 		startActivity(intent);
 	}
-	
+
 	/**
 	 * Starts activity to add a new movie
 	 * @param view
@@ -132,10 +144,24 @@ public class MainActivity extends Activity {
 
 	class SearchThread extends Thread {
 		// TODO: Implement search thread
-		
+
+		private String query;
+
+		public SearchThread(String query) {
+			this.query = query;
+		}
+
+		private getResults() {}
+
+		public void run() {
+			movies.clear();
+			movies.addAll(movieManager.searchMovies(search, null));
+			notifyUpdated();
+		}
+
 	}
 
-	
+
 	class DeleteThread extends Thread {
 		private int movieId;
 

@@ -10,6 +10,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import ca.ualberta.ssrg.androidelasticsearch.R;
 
@@ -70,16 +71,13 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		
 		SearchThread thread = new SearchThread("*");
-
 		thread.start();
 
 
 	}
-	
-	/** 
+
+	/**
 	 * Called when the model changes
 	 */
 	public void notifyUpdated() {
@@ -89,23 +87,26 @@ public class MainActivity extends Activity {
 				moviesViewAdapter.notifyDataSetChanged();
 			}
 		};
-		
+
 		runOnUiThread(doUpdateGUIList);
 	}
 
-	/** 
+	/**
 	 * Search for movies with a given word(s) in the text view
 	 * @param view
 	 */
 	public void search(View view) {
 		movies.clear();
 
-		// TODO: Extract search query from text view
-		
-		// TODO: Run the search thread
-		
+		// Extract search query from text view
+		TextView textView = (TextView) findViewById(R.id.editText1);
+		String query = textView.getText().toString();
+
+		// Run the search thread
+		SearchThread searchThread = new SearchThread(query);
+		searchThread.start();
 	}
-	
+
 	/**
 	 * Starts activity with details for a movie
 	 * @param movieId Movie id
@@ -116,7 +117,7 @@ public class MainActivity extends Activity {
 
 		startActivity(intent);
 	}
-	
+
 	/**
 	 * Starts activity to add a new movie
 	 * @param view
@@ -140,10 +141,10 @@ public class MainActivity extends Activity {
 			movies.addAll(movieManager.searchMovies(search, null));
 			notifyUpdated();
 		}
-		
+
 	}
 
-	
+
 	class DeleteThread extends Thread {
 		private int movieId;
 
